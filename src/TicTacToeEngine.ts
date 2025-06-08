@@ -12,11 +12,13 @@ import {
 
 export class TicTacToeEngine {
   private gameState: GameState;
+  private gameMode: GameMode;
 
   constructor(
     players: GamePlayer[],
     gameMode: GameMode = 'classic'
   ) {
+    this.gameMode = gameMode;
     this.gameState = this.initializeGame(players, gameMode);
   }
 
@@ -228,7 +230,7 @@ export class TicTacToeEngine {
 
   public resetGame(): GameState {
     const players = this.gameState.players.map(p => ({ ...p, isReady: false }));
-    this.gameState = this.initializeGame(players, 'classic');
+    this.gameState = this.initializeGame(players, this.gameMode);
     return this.getGameState();
   }
 
