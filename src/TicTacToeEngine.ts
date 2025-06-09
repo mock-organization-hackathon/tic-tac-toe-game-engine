@@ -7,6 +7,8 @@ import {
   Board,
   GameMode,
   GameStatus,
+  PlayerColor,
+  DEFAULT_PLAYER_COLORS,
   GAME_CONFIG
 } from '@tic-tac-toe-arena/shared-types';
 
@@ -33,6 +35,7 @@ export class TicTacToeEngine {
       players: players.map((player, index) => ({
         ...player,
         symbol: index === 0 ? 'X' : 'O',
+        color: player.color || DEFAULT_PLAYER_COLORS[index % DEFAULT_PLAYER_COLORS.length],
         isReady: false,
         score: 0
       })),
@@ -40,6 +43,31 @@ export class TicTacToeEngine {
       updatedAt: new Date(),
       moveHistory: []
     };
+  }
+
+  public selectPlayerColor(playerId: string, color: PlayerColor): boolean {
+    const player = this.gameState.players.find(p => p.id === playerId);
+    if (!player) {
+      return false;
+    }
+
+    // Check if color is already taken by another player
+    const isColorTaken = this.gameState.players.some(
+      p => p.id !== playerId && p.color === color
+    );
+
+    if (isColorTaken) {
+      return false;
+    }
+
+    player.color = color;
+    this.gameState.updatedAt = new Date();
+    return true;
+  }
+
+  public getAvailableColors(): PlayerColor[] {
+    const usedColors = this.gameState.players.map(p => p.color);
+    return DEFAULT_PLAYER_COLORS.filter(color => !usedColors.includes(color));
   }
 
   private getBoardSize(gameMode: GameMode): number {
@@ -196,14 +224,16 @@ export class TicTacToeEngine {
       throw new Error('Game is full');
     }
 
-    const playerWithSymbol = {
+    const availableColors = this.getAvailableColors();
+    const playerWithDefaults = {
       ...player,
       symbol: this.gameState.players.length === 0 ? 'X' : 'O' as Player,
+      color: player.color || availableColors[0] || DEFAULT_PLAYER_COLORS[this.gameState.players.length],
       isReady: false,
       score: 0
     };
 
-    this.gameState.players.push(playerWithSymbol);
+    this.gameState.players.push(playerWithDefaults);
     this.gameState.updatedAt = new Date();
 
     return this.getGameState();
@@ -261,4 +291,4 @@ export class TicTacToeEngine {
       validMoves: this.getValidMoves().length
     };
   }
-} 
+}
