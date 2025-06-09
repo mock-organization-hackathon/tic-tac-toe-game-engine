@@ -7,7 +7,9 @@ import {
   Board,
   GameMode,
   GameStatus,
-  GAME_CONFIG
+  PlayerColor,
+  GAME_CONFIG,
+  PLAYER_COLORS
 } from '@tic-tac-toe-arena/shared-types';
 
 export class TicTacToeEngine {
@@ -33,6 +35,7 @@ export class TicTacToeEngine {
       players: players.map((player, index) => ({
         ...player,
         symbol: index === 0 ? 'X' : 'O',
+        color: player.color || (index === 0 ? PLAYER_COLORS.BLUE : PLAYER_COLORS.RED),
         isReady: false,
         score: 0
       })),
@@ -199,6 +202,7 @@ export class TicTacToeEngine {
     const playerWithSymbol = {
       ...player,
       symbol: this.gameState.players.length === 0 ? 'X' : 'O' as Player,
+      color: player.color || (this.gameState.players.length === 0 ? PLAYER_COLORS.BLUE : PLAYER_COLORS.RED),
       isReady: false,
       score: 0
     };
@@ -261,4 +265,31 @@ export class TicTacToeEngine {
       validMoves: this.getValidMoves().length
     };
   }
-} 
+
+  public setPlayerColor(playerId: string, color: PlayerColor): GameState {
+    const player = this.gameState.players.find(p => p.id === playerId);
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    // Check if color is already taken by another player
+    const colorTaken = this.gameState.players.some(p => p.id !== playerId && p.color === color);
+    if (colorTaken) {
+      throw new Error('Color already taken by another player');
+    }
+
+    player.color = color;
+    this.gameState.updatedAt = new Date();
+
+    return this.getGameState();
+  }
+
+  public getPlayerByColor(color: PlayerColor): GamePlayer | null {
+    return this.gameState.players.find(p => p.color === color) || null;
+  }
+
+  public getAvailableColors(): PlayerColor[] {
+    const usedColors = this.gameState.players.map(p => p.color);
+    return Object.values(PLAYER_COLORS).filter(color => !usedColors.includes(color));
+  }
+}
