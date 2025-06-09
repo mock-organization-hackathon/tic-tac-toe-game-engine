@@ -17,6 +17,7 @@ export class TicTacToeEngine {
     players: GamePlayer[],
     gameMode: GameMode = 'classic'
   ) {
+    console.log('automation system worked');
     this.gameState = this.initializeGame(players, gameMode);
   }
 
@@ -261,4 +262,4 @@ export class TicTacToeEngine {
       validMoves: this.getValidMoves().length
     };
   }
-} 
+}
